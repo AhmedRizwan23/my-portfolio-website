@@ -1284,3 +1284,63 @@ img { max-width: 100%; display: block; }
   background: rgba(99, 102, 241, 0.3);
   color: #fff;
 }
+
+/* ============================================
+   CUSTOM GLOW CURSOR
+   ============================================ */
+.custom-cursor-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent-1);
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  transition: width 0.2s, height 0.2s, background-color 0.2s;
+}
+
+.custom-cursor-glow {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(99, 102, 241, 0.05) 70%, transparent 100%);
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9998;
+  mix-blend-mode: screen;
+  transition: width 0.3s, height 0.3s, background 0.3s;
+}
+
+/* Cursor Hover states */
+.custom-cursor-dot.hover {
+  width: 12px;
+  height: 12px;
+  background-color: var(--accent-2);
+}
+
+.custom-cursor-glow.hover {
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, rgba(236, 72, 153, 0.15) 70%, transparent 100%);
+}
+
+/* Hide default cursor on desktops to complete the premium feel */
+@media (min-width: 769px) {
+  html, body, a, button, .project-card, .btn, .nav-links a, .hamburger, .timeline-card {
+    cursor: none !important;
+  }
+}
+
+/* Hide on mobile devices since there's no hover state */
+@media (max-width: 768px) {
+  .custom-cursor-dot,
+  .custom-cursor-glow {
+    display: none !important;
+  }
+}

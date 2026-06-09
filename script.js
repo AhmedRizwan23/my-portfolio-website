@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTypingEffect();
   initCountUp();
   initAvatarTilt();
+  initCustomCursor();
 });
 
 /* ---------- Particle Canvas Background ---------- */
@@ -335,5 +336,69 @@ function initAvatarTilt() {
   // Re-enable snappy tracking transition when mouse enters the window again
   document.addEventListener('mouseenter', () => {
     avatar.style.transition = 'transform 0.15s ease-out';
+  });
+}
+
+/* ---------- Custom Glow Cursor Trail ---------- */
+function initCustomCursor() {
+  const dot = document.querySelector('.custom-cursor-dot');
+  const glow = document.querySelector('.custom-cursor-glow');
+  if (!dot || !glow) return;
+
+  let mouseX = 0, mouseY = 0; // Actual mouse position
+  let dotX = 0, dotY = 0;     // Animated dot position
+  let glowX = 0, glowY = 0;   // Animated glow position
+
+  // Track mouse coordinates
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  // Main animation loop for custom cursor with elegant trailing lag (lerp)
+  function animateCursor() {
+    // Linear interpolation formula: current + (target - current) * speed factor
+    // Dot is very snappy (speed = 0.25)
+    dotX += (mouseX - dotX) * 0.25;
+    dotY += (mouseY - dotY) * 0.25;
+
+    // Glow has a smooth trailing lag (speed = 0.08)
+    glowX += (mouseX - glowX) * 0.08;
+    glowY += (mouseY - glowY) * 0.08;
+
+    dot.style.left = `${dotX}px`;
+    dot.style.top = `${dotY}px`;
+
+    glow.style.left = `${glowX}px`;
+    glow.style.top = `${glowY}px`;
+
+    requestAnimationFrame(animateCursor);
+  }
+  
+  // Start the animation loop
+  requestAnimationFrame(animateCursor);
+
+  // Setup hover interaction state classes
+  const hoverables = document.querySelectorAll('a, button, .project-card, .btn, .nav-links a, .hamburger, .timeline-card');
+  hoverables.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      dot.classList.add('hover');
+      glow.classList.add('hover');
+    });
+    el.addEventListener('mouseleave', () => {
+      dot.classList.remove('hover');
+      glow.classList.remove('hover');
+    });
+  });
+
+  // Hide the cursor elements if the mouse leaves the document window entirely
+  document.addEventListener('mouseleave', () => {
+    dot.style.opacity = '0';
+    glow.style.opacity = '0';
+  });
+
+  document.addEventListener('mouseenter', () => {
+    dot.style.opacity = '1';
+    glow.style.opacity = '1';
   });
 }
