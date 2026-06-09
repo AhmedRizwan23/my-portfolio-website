@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initTypingEffect();
   initCountUp();
+  initAvatarTilt();
 });
 
 /* ---------- Particle Canvas Background ---------- */
@@ -289,4 +290,50 @@ function initCountUp() {
   }, { threshold: 0.5 });
 
   counters.forEach(c => observer.observe(c));
+}
+
+/* ---------- Interactive 3D Avatar Tilt (Face Follows Cursor) ---------- */
+function initAvatarTilt() {
+  const avatar = document.querySelector('.hero-avatar');
+  const wrapper = document.querySelector('.hero-avatar-wrapper');
+  if (!avatar || !wrapper) return;
+
+  // Ensure initial transitions and transform styles are set
+  avatar.style.transition = 'transform 0.15s ease-out';
+  avatar.style.transformStyle = 'preserve-3d';
+
+  window.addEventListener('mousemove', (e) => {
+    // Get viewport coordinates of the avatar center
+    const rect = avatar.getBoundingClientRect();
+    const avatarCenterX = rect.left + rect.width / 2;
+    const avatarCenterY = rect.top + rect.height / 2;
+
+    // Distance from cursor to avatar center
+    const deltaX = e.clientX - avatarCenterX;
+    const deltaY = e.clientY - avatarCenterY;
+
+    // Normalize coordinates (clamped between -1 and 1) based on standard screen sensitivity range
+    const maxDistance = 600; 
+    const normX = Math.max(-1, Math.min(1, deltaX / maxDistance));
+    const normY = Math.max(-1, Math.min(1, deltaY / maxDistance));
+
+    // Calculate rotation angles (max tilt angle of 18 degrees)
+    const maxTilt = 18;
+    const rotateY = normX * maxTilt;
+    const rotateX = -normY * maxTilt; // Inverse y-axis for proper gaze tracking direction
+
+    // Apply the 3D rotation and a subtle zoom on hover
+    avatar.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+  });
+
+  // Smoothly reset rotation when mouse leaves the document window
+  document.addEventListener('mouseleave', () => {
+    avatar.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+    avatar.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+  });
+
+  // Re-enable snappy tracking transition when mouse enters the window again
+  document.addEventListener('mouseenter', () => {
+    avatar.style.transition = 'transform 0.15s ease-out';
+  });
 }
