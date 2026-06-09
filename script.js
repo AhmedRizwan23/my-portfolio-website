@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAvatarTilt();
   initCustomCursor();
   initShootingStars();
+  initExplodingCommits();
 });
 
 /* ---------- Particle Canvas Background ---------- */
@@ -430,10 +431,63 @@ function initShootingStars() {
 
     container.appendChild(star);
 
+    // 25% chance of exploding mid-air
+    const willExplode = Math.random() < 0.25;
+    let explosionTimeout;
+
+    if (willExplode) {
+      // Explode at a random point in its flight (between 30% and 60% of total duration)
+      const explodePercent = Math.random() * 0.3 + 0.3; 
+      const explodeDelay = duration * 1000 * explodePercent;
+
+      explosionTimeout = setTimeout(() => {
+        explodeStar(star);
+      }, explodeDelay);
+    }
+
     // Remove the element once the animation ends to keep DOM clean
     star.addEventListener('animationend', () => {
+      if (explosionTimeout) clearTimeout(explosionTimeout);
       star.remove();
     });
+  }
+
+  function explodeStar(starEl) {
+    // Get live position of the leading tip (bottom-left corner of the rotated bounding box)
+    const rect = starEl.getBoundingClientRect();
+    const headX = rect.left;
+    const headY = rect.bottom;
+
+    // Spawn 15 to 22 glowing star spark particles bursting outward
+    const sparkCount = Math.floor(Math.random() * 8) + 15;
+    
+    for (let i = 0; i < sparkCount; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'star-spark';
+      
+      // Initial positions at the leading head coordinates
+      spark.style.left = `${headX}px`;
+      spark.style.top = `${headY}px`;
+
+      // Random math distribution: angle (0 to 360) and distance (40px to 110px)
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 70 + 40;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+
+      spark.style.setProperty('--tx', `${tx}px`);
+      spark.style.setProperty('--ty', `${ty}px`);
+
+      container.appendChild(spark);
+
+      // Clean up spark node
+      spark.addEventListener('animationend', () => {
+        spark.remove();
+      });
+    }
+
+    // Remove the original shooting star
+    starEl.remove();
   }
 
   // Spawn initial star, and then queue up future spawns at random intervals (every 2 to 5 seconds)
@@ -448,4 +502,113 @@ function initShootingStars() {
   }
 
   queueNextStar();
+}
+
+/* ---------- Exploding Commits Background Effect ---------- */
+function initExplodingCommits() {
+  const container = document.querySelector('.shooting-stars-container');
+  if (!container) return;
+
+  const commitMessages = [
+    'feat: added custom cursor trail',
+    'fix: removed project duplication',
+    'feat: interactive 3D avatar tilt',
+    'style: glassmorphic cards',
+    'refactor: optimized mobile layout',
+    'feat: added WhatsApp contact link',
+    'git commit -m "Update brand logo"',
+    'git push origin main...',
+    'merge: branch feature/avatar-3d',
+    'chore: updated local dev assets',
+    'feat: scroll reveal active',
+    'style: added modern neon glow accents',
+    'git checkout -b feature/neon-glow',
+    'commit db31bdf: interactive particles',
+    'commit a59e01b: cursor spot glow',
+    'commit 791d62f: added social links'
+  ];
+
+  const shardCharacters = ['{', '}', ';', '=>', 'git', 'push', 'commit', 'feat', 'fix', '+', '-', 'const', 'let', '()', '[]', '0', '1'];
+
+  function spawnCommit() {
+    const el = document.createElement('div');
+    el.className = 'exploding-commit';
+
+    // Choose random commit message
+    const msg = commitMessages[Math.floor(Math.random() * commitMessages.length)];
+    el.textContent = msg;
+
+    // Random horizontal position (10% to 75%)
+    const posX = Math.random() * 65 + 10;
+    el.style.left = `${posX}%`;
+
+    // Random vertical starting position (65vh to 80vh)
+    const posY = Math.random() * 15 + 65;
+    el.style.top = `${posY}vh`;
+
+    container.appendChild(el);
+
+    // Schedule explosion just before the floatUpToExplode animation finishes (takes 3s)
+    setTimeout(() => {
+      explodeCommit(el, posX, posY);
+    }, 2850);
+  }
+
+  function explodeCommit(commitEl, xPercent, yPercent) {
+    // Get final pixel position of the commit element for particle spawns
+    const rect = commitEl.getBoundingClientRect();
+    const pixelX = rect.left + rect.width / 2;
+    const pixelY = rect.top + rect.height / 2;
+
+    // Spawn 10 to 14 code syntax shard particles exploding outwards
+    const shardCount = Math.floor(Math.random() * 5) + 10;
+    
+    for (let i = 0; i < shardCount; i++) {
+      const shard = document.createElement('div');
+      shard.className = 'commit-shard';
+      
+      // Select random code syntax character
+      shard.textContent = shardCharacters[Math.floor(Math.random() * shardCharacters.length)];
+      
+      // Set initial positions
+      shard.style.left = `${pixelX}px`;
+      shard.style.top = `${pixelY}px`;
+
+      // Random math distribution: angle (0 to 360) and distance (60px to 140px)
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 80 + 60;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      const rot = Math.random() * 360 - 180;
+
+      // Set CSS variables for transition translate values
+      shard.style.setProperty('--tx', `${tx}px`);
+      shard.style.setProperty('--ty', `${ty}px`);
+      shard.style.setProperty('--rot', `${rot}deg`);
+
+      container.appendChild(shard);
+
+      // Clean up shard after animation
+      shard.addEventListener('animationend', () => {
+        shard.remove();
+      });
+    }
+
+    // Remove the original text element
+    commitEl.remove();
+  }
+
+  // Spawn first commit, then schedule next spawns at rare intervals (every 14s to 22s)
+  // to prevent screen cluttering and keep it as a premium Easter egg
+  setTimeout(spawnCommit, 5000);
+
+  function queueNextCommit() {
+    const delay = Math.random() * 8000 + 14000; // 14s to 22s
+    setTimeout(() => {
+      spawnCommit();
+      queueNextCommit();
+    }, delay);
+  }
+
+  queueNextCommit();
 }
