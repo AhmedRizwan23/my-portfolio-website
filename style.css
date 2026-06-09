@@ -1344,3 +1344,57 @@ img { max-width: 100%; display: block; }
     display: none !important;
   }
 }
+
+/* ============================================
+   SHOOTING STARS / FALLING ASTEROIDS BACKGROUND EFFECT
+   ============================================ */
+.shooting-stars-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0; /* Behind content, above canvas */
+}
+
+.shooting-star {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(to right, #fff 0%, rgba(139, 92, 246, 0.4) 50%, transparent 100%);
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6));
+  border-radius: 999px;
+  opacity: 0;
+  transform: rotate(-45deg);
+  pointer-events: none;
+  animation: shoot 4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Bright glowing head of the shooting star (positioned at the leading left edge) */
+.shooting-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 4px;
+  width: 4px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px 2px #fff, 0 0 18px 4px rgba(139, 92, 246, 0.8);
+}
+
+@keyframes shoot {
+  0% {
+    opacity: 0;
+    width: 0px;
+    transform: translate(0, 0) rotate(-45deg);
+  }
+  15% {
+    opacity: 1;
+    width: 80px;
+  }
+  100% {
+    opacity: 0;
+    width: 180px;
+    transform: translate(-350px, 350px) rotate(-45deg);
+  }
+}

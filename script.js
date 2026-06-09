@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCountUp();
   initAvatarTilt();
   initCustomCursor();
+  initShootingStars();
 });
 
 /* ---------- Particle Canvas Background ---------- */
@@ -401,4 +402,50 @@ function initCustomCursor() {
     dot.style.opacity = '1';
     glow.style.opacity = '1';
   });
+}
+
+/* ---------- Interactive Shooting Stars / Falling Asteroids Effect ---------- */
+function initShootingStars() {
+  const container = document.querySelector('.shooting-stars-container');
+  if (!container) return;
+
+  function spawnStar() {
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+
+    // Random starting position in the upper-right area of the screen
+    const startX = Math.random() * 60 + 35; // 35% to 95% from left
+    const startY = Math.random() * 45 - 15; // -15% to 30% from top (starts slightly off-screen)
+    
+    star.style.left = `${startX}%`;
+    star.style.top = `${startY}%`;
+
+    // Randomize speed/duration (8s to 12s for a slow, elegant, majestic drift)
+    const duration = Math.random() * 4 + 8;
+    star.style.animationDuration = `${duration}s`;
+
+    // Randomize size/scale of the star (0.6 to 1.3)
+    const scale = Math.random() * 0.7 + 0.6;
+    star.style.transform = `rotate(-45deg) scale(${scale})`;
+
+    container.appendChild(star);
+
+    // Remove the element once the animation ends to keep DOM clean
+    star.addEventListener('animationend', () => {
+      star.remove();
+    });
+  }
+
+  // Spawn initial star, and then queue up future spawns at random intervals (every 2 to 5 seconds)
+  spawnStar();
+
+  function queueNextStar() {
+    const delay = Math.random() * 3000 + 2000; // 2s to 5s
+    setTimeout(() => {
+      spawnStar();
+      queueNextStar();
+    }, delay);
+  }
+
+  queueNextStar();
 }
